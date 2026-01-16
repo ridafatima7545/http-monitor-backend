@@ -7,6 +7,7 @@ import { AppService } from './app.service';
 import { PingModule } from './ping/ping.module';
 import { ResponsesModule } from './responses/responses.module';
 import { WebsocketModule } from './websocket/websocket.module';
+import { JobsModule } from './jobs/jobs.module';
 import { HttpResponse } from './entities/http-response.entity';
 
 @Module({
@@ -16,9 +17,13 @@ import { HttpResponse } from './entities/http-response.entity';
     }),
     TypeOrmModule.forRoot({
       type: 'postgres',
-      url: process.env.DATABASE_URL,
+      host: process.env.DB_HOST,
+      port: parseInt(process.env.DB_PORT || '5432'),
+      username: process.env.DB_USERNAME,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME,
       entities: [HttpResponse],
-      synchronize: process.env.NODE_ENV !== 'production', // Auto-sync schema in dev
+      synchronize: process.env.NODE_ENV !== 'production',
       logging: process.env.NODE_ENV !== 'production',
       ssl:
         process.env.NODE_ENV === 'production'
@@ -29,6 +34,7 @@ import { HttpResponse } from './entities/http-response.entity';
     PingModule,
     ResponsesModule,
     WebsocketModule,
+    JobsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -30,9 +30,6 @@ export class WebsocketGateway
     this.logger.log(`Client disconnected: ${client.id}`);
   }
 
-  /**
-   * Broadcast new HTTP response to all connected clients
-   */
   broadcastNewResponse(response: HttpResponse) {
     this.logger.log(`Broadcasting new response: ${response.id}`);
     this.server.emit('new-response', response);

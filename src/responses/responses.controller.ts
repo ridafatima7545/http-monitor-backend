@@ -12,17 +12,11 @@ import { QueryResponseDto } from '../dto/query-response.dto';
 export class ResponsesController {
   constructor(private readonly pingService: PingService) {}
 
-  /**
-   * Get all responses with pagination
-   */
   @Get()
   async findAll(@Query() query: QueryResponseDto) {
     return await this.pingService.findAll(query.page, query.limit);
   }
 
-  /**
-   * Get a single response by ID
-   */
   @Get(':id')
   async findOne(@Param('id') id: string) {
     const response = await this.pingService.findOne(id);
@@ -32,9 +26,6 @@ export class ResponsesController {
     return response;
   }
 
-  /**
-   * Get the latest response (for polling fallback)
-   */
   @Get('latest/data')
   async getLatest() {
     const response = await this.pingService.findLatest();
@@ -44,9 +35,6 @@ export class ResponsesController {
     return response;
   }
 
-  /**
-   * Get statistics for anomaly detection
-   */
   @Get('stats/summary')
   async getStats(@Query('windowHours') windowHours?: number) {
     const hours = windowHours ? parseInt(windowHours.toString()) : 24;

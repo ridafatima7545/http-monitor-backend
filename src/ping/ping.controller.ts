@@ -7,9 +7,6 @@ export class PingController {
 
   constructor(private readonly pingService: PingService) {}
 
-  /**
-   * Trigger a manual ping (used by external cron service)
-   */
   @Post('trigger')
   async triggerPing() {
     this.logger.log('Manual ping triggered');

@@ -27,7 +27,7 @@ export class HttpResponse {
 
   @Column({ type: 'float' })
   @Index()
-  responseTime: number; // in milliseconds
+  responseTime: number;
 
   @Column({ type: 'jsonb', nullable: true })
   headers: any;

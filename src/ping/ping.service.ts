@@ -17,9 +17,6 @@ export class PingService {
     private readonly websocketGateway: WebsocketGateway,
   ) {}
 
-  /**
-   * Generate a random JSON payload for the HTTP request
-   */
   generateRandomPayload(): any {
     const types = ['A', 'B', 'C', 'D', 'E'];
     const randomType = types[Math.floor(Math.random() * types.length)];
@@ -44,19 +41,19 @@ export class PingService {
     };
   }
 
-  /**
-   * Generate random tags array
-   */
   private generateRandomTags(): string[] {
-    const allTags = ['monitoring', 'test', 'production', 'staging', 'development'];
+    const allTags = [
+      'monitoring',
+      'test',
+      'production',
+      'staging',
+      'development',
+    ];
     const count = Math.floor(Math.random() * 3) + 1;
     const shuffled = allTags.sort(() => 0.5 - Math.random());
     return shuffled.slice(0, count);
   }
 
-  /**
-   * Execute ping to httpbin.org and save the response
-   */
   async executePing(): Promise<HttpResponse> {
     const payload = this.generateRandomPayload();
     const startTime = Date.now();
@@ -65,7 +62,7 @@ export class PingService {
       this.logger.log('Executing ping to httpbin.org...');
 
       const response = await axios.post(this.HTTPBIN_URL, payload, {
-        timeout: 10000, // 10 second timeout
+        timeout: 10000,
         headers: {
           'Content-Type': 'application/json',
         },
@@ -77,7 +74,6 @@ export class PingService {
         `Ping successful - Status: ${response.status}, Time: ${responseTime}ms`,
       );
 
-      // Save to database
       const httpResponse = await this.saveResponse({
         timestamp: new Date(),
         requestPayload: payload,
@@ -87,7 +83,6 @@ export class PingService {
         headers: response.headers,
       });
 
-      // Broadcast to connected WebSocket clients
       this.websocketGateway.broadcastNewResponse(httpResponse);
 
       return httpResponse;
@@ -95,7 +90,6 @@ export class PingService {
       const responseTime = Date.now() - startTime;
       this.logger.error('Ping failed', error);
 
-      // Handle errors gracefully - still save the error response
       if (axios.isAxiosError(error)) {
         const axiosError = error as AxiosError;
         const errorResponse = await this.saveResponse({
@@ -120,9 +114,6 @@ export class PingService {
     }
   }
 
-  /**
-   * Save HTTP response to database
-   */
   private async saveResponse(data: {
     timestamp: Date;
     requestPayload: any;
@@ -135,9 +126,6 @@ export class PingService {
     return await this.responseRepository.save(response);
   }
 
-  /**
-   * Get all responses with pagination
-   */
   async findAll(page: number = 1, limit: number = 20) {
     const [data, total] = await this.responseRepository.findAndCount({
       order: { timestamp: 'DESC' },
@@ -156,32 +144,21 @@ export class PingService {
     };
   }
 
-  /**
-   * Get a single response by ID
-   */
   async findOne(id: string): Promise<HttpResponse | null> {
     return await this.responseRepository.findOne({ where: { id } });
   }
 
-  /**
-   * Get the latest response
-   */
   async findLatest(): Promise<HttpResponse | null> {
     return await this.responseRepository.findOne({
       order: { timestamp: 'DESC' },
     });
   }
 
-  /**
-   * Get statistics for anomaly detection
-   */
   async getStats(windowHours: number = 24) {
     const since = new Date(Date.now() - windowHours * 60 * 60 * 1000);
 
     const responses = await this.responseRepository.find({
-      where: {
-        timestamp: since as any, // TypeORM MoreThan equivalent
-      },
+      where: {},
       order: { timestamp: 'ASC' },
     });
 
@@ -210,17 +187,11 @@ export class PingService {
     };
   }
 
-  /**
-   * Calculate mean (average)
-   */
   private calculateMean(values: number[]): number {
     if (values.length === 0) return 0;
     return values.reduce((sum, val) => sum + val, 0) / values.length;
   }
 
-  /**
-   * Calculate standard deviation
-   */
   private calculateStdDev(values: number[], mean: number): number {
     if (values.length === 0) return 0;
     const squaredDiffs = values.map((val) => Math.pow(val - mean, 2));
