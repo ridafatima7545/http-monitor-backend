@@ -5,6 +5,7 @@ import axios, { AxiosError } from 'axios';
 import { v4 as uuidv4 } from 'uuid';
 import { HttpResponse } from '../entities/http-response.entity';
 import { WebsocketGateway } from '../websocket/websocket.gateway';
+import { AnomalyDetectorService } from '../anomaly-detection/anomaly-detector.service';
 
 @Injectable()
 export class PingService {
@@ -15,6 +16,7 @@ export class PingService {
     @InjectRepository(HttpResponse)
     private readonly responseRepository: Repository<HttpResponse>,
     private readonly websocketGateway: WebsocketGateway,
+    private readonly anomalyDetectorService: AnomalyDetectorService,
   ) {}
 
   generateRandomPayload(): any {
@@ -85,6 +87,12 @@ export class PingService {
 
       this.websocketGateway.broadcastNewResponse(httpResponse);
 
+      const anomalies =
+        await this.anomalyDetectorService.detectAnomalies(httpResponse);
+      anomalies.forEach((anomaly) => {
+        this.websocketGateway.broadcastAnomaly(anomaly);
+      });
+
       return httpResponse;
     } catch (error) {
       const responseTime = Date.now() - startTime;
@@ -107,6 +115,13 @@ export class PingService {
         });
 
         this.websocketGateway.broadcastNewResponse(errorResponse);
+
+        const anomalies =
+          await this.anomalyDetectorService.detectAnomalies(errorResponse);
+        anomalies.forEach((anomaly) => {
+          this.websocketGateway.broadcastAnomaly(anomaly);
+        });
+
         return errorResponse;
       }
 

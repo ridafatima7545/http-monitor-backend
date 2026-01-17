@@ -8,7 +8,10 @@ import { PingModule } from './ping/ping.module';
 import { ResponsesModule } from './responses/responses.module';
 import { WebsocketModule } from './websocket/websocket.module';
 import { JobsModule } from './jobs/jobs.module';
+import { AnomalyDetectionModule } from './anomaly-detection/anomaly-detection.module';
 import { HttpResponse } from './entities/http-response.entity';
+import { Anomaly } from './entities/anomaly.entity';
+import { Statistic } from './entities/statistic.entity';
 
 @Module({
   imports: [
@@ -22,7 +25,7 @@ import { HttpResponse } from './entities/http-response.entity';
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
-      entities: [HttpResponse],
+      entities: [HttpResponse, Anomaly, Statistic],
       synchronize: process.env.NODE_ENV !== 'production',
       logging: process.env.NODE_ENV !== 'production',
       ssl:
@@ -35,6 +38,7 @@ import { HttpResponse } from './entities/http-response.entity';
     ResponsesModule,
     WebsocketModule,
     JobsModule,
+    AnomalyDetectionModule,
   ],
   controllers: [AppController],
   providers: [AppService],
